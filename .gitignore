@@ -1,4 +1,6 @@
-# Environment Variables
+# ==============================================================================
+# Environment Variables & Secrets (NEVER COMMIT)
+# ==============================================================================
 .env
 .env.local
 .env.*.local
@@ -7,36 +9,76 @@
 .env.test
 !.env.example
 
-# Logs
-logs
+# ==============================================================================
+# Dependencies & Package Managers
+# ==============================================================================
+node_modules/
+.pnp/
+.pnp.js
+.pnpm-store/
+bun.lockb
+
+# ==============================================================================
+# Build Outputs & Framework Caches
+# ==============================================================================
+dist/
+dist-ssr/
+build/
+.output/
+.vinxi/
+.nitro/
+.tanstack/
+.turbo/
+.cache/
+*.local
+
+# ==============================================================================
+# Deployment & Cloudflare / Wrangler
+# ==============================================================================
+.wrangler/
+.dev.vars
+
+# ==============================================================================
+# Logs & Diagnostic Files
+# ==============================================================================
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.pid
+*.seed
+*.pid.lock
 
-# Dependencies & Build Outputs
-node_modules
-dist
-dist-ssr
-.output
-.vinxi
-.tanstack/**
-.nitro
-*.local
+# ==============================================================================
+# Testing & Coverage
+# ==============================================================================
+coverage/
+.nyc_output/
 
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
+# ==============================================================================
+# OS Files (macOS, Windows, Linux)
+# ==============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Editor directories and files
+# ==============================================================================
+# IDEs & Editor Files
+# ==============================================================================
+.idea/
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
