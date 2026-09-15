@@ -16,7 +16,9 @@ node_modules/
 .pnp/
 .pnp.js
 .pnpm-store/
+bun.lock
 bun.lockb
+bunfig.toml
 
 # ==============================================================================
 # Build Outputs & Framework Caches
