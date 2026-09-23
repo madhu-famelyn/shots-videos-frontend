@@ -1,17 +1,13 @@
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import {
-  ArrowRight,
   Bell,
   Clock,
-  Film,
   Flame,
-  Globe,
   Heart,
   HelpCircle,
   History,
   LogIn,
-  LogOut,
   Play,
   Search,
   Settings,
@@ -21,23 +17,22 @@ import {
   Tv,
   User,
   Zap,
+  Loader2,
 } from "lucide-react";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import { Avatar } from "@/components/common/Avatar";
 import { LanguageSelector } from "@/components/common/LanguageSelector";
 import { HelpFeedbackModal } from "@/components/common/HelpFeedbackModal";
 import { OTTSectionRow } from "@/components/landing/OTTSectionRow";
-import { OTTCategoryBar, OTT_CATEGORIES } from "@/components/landing/OTTCategoryBar";
+import { OTTCategoryBar } from "@/components/landing/OTTCategoryBar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useQuery } from "@tanstack/react-query";
 import { showApi } from "@/services/api/showApi";
-import { mockShows } from "@/mock/shows";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/")({
@@ -62,7 +57,7 @@ export const Route = createFileRoute("/")({
 });
 
 function LandingPage() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,18 +72,17 @@ function LandingPage() {
     }
   };
 
-  // Fetch dynamic Bhojpuri shows from FastAPI backend (with fallback to mockShows)
-  const { data: allShows = mockShows } = useQuery({
+  // Fetch dynamic Bhojpuri shows from FastAPI backend
+  const { data: allShows = [], isLoading } = useQuery({
     queryKey: ["shows"],
     queryFn: () => showApi.list(),
-    initialData: mockShows,
   });
 
   // Group shows by section category
-  const trendingShows = useMemo(
-    () => allShows.filter((s) => s.sectionCategory === "trending"),
-    [allShows],
-  );
+  const trendingShows = useMemo(() => {
+    const explicit = allShows.filter((s) => s.sectionCategory === "trending");
+    return explicit.length > 0 ? explicit : allShows;
+  }, [allShows]);
   const comingSoonShows = useMemo(
     () => allShows.filter((s) => s.sectionCategory === "coming_soon"),
     [allShows],
@@ -110,7 +104,7 @@ function LandingPage() {
     [allShows],
   );
 
-  const featuredShow = allShows[0] || mockShows[0]!;
+  const featuredShow = allShows.length > 0 ? allShows[0] : null;
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-amber-400 selection:text-black overflow-x-hidden">
@@ -125,10 +119,8 @@ function LandingPage() {
           </Link>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* Language Badge (Bhojpuri in English) */}
             <LanguageSelector />
 
-            {/* Profile Dropdown Menu (Houses Profile, Mobile Log In, Help & Feedback, Settings, History) */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 {isAuthenticated ? (
@@ -157,7 +149,6 @@ function LandingPage() {
 
               <DropdownMenuContent align="end" className="w-56 rounded-2xl border border-amber-500/20 bg-zinc-950/95 p-2 backdrop-blur-xl shadow-2xl z-50">
                 {isAuthenticated ? (
-                  /* Authenticated User Menu */
                   <>
                     <div className="px-3 py-2 border-b border-white/10 mb-1">
                       <p className="text-xs font-bold text-white truncate">{user?.name || "Bhojpuri Viewer"}</p>
@@ -199,25 +190,9 @@ function LandingPage() {
                         <span>Account Settings</span>
                       </Link>
                     </DropdownMenuItem>
-
-                    <DropdownMenuSeparator className="my-1 bg-white/10" />
-
-                    <DropdownMenuItem
-                      onClick={() => void logout()}
-                      className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 cursor-pointer"
-                    >
-                      <LogOut className="size-4" />
-                      <span>Log Out</span>
-                    </DropdownMenuItem>
                   </>
                 ) : (
-                  /* Guest / Unauthenticated Menu */
                   <>
-                    <div className="px-3 py-2 border-b border-white/10 mb-2">
-                      <p className="text-xs font-bold text-white">Echo Reels Bhojpuri</p>
-                      <p className="text-[11px] text-muted-foreground">Log in with Mobile to stream & save history</p>
-                    </div>
-
                     <div className="px-1 mb-2">
                       <Link
                         to="/login"
@@ -237,20 +212,6 @@ function LandingPage() {
                     </DropdownMenuItem>
 
                     <DropdownMenuItem asChild>
-                      <Link to="/profile" className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-white hover:bg-white/10 cursor-pointer">
-                        <User className="size-4 text-amber-400" />
-                        <span>My Profile</span>
-                      </Link>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild>
-                      <Link to="/history" className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-white hover:bg-white/10 cursor-pointer">
-                        <History className="size-4 text-amber-400" />
-                        <span>Watch History</span>
-                      </Link>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild>
                       <Link to="/settings" className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-white hover:bg-white/10 cursor-pointer">
                         <Settings className="size-4 text-amber-400" />
                         <span>Settings</span>
@@ -264,73 +225,110 @@ function LandingPage() {
         </div>
       </header>
 
-      {/* Featured Spotlight Banner */}
-      <section className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 pt-4 pb-2">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 p-6 sm:p-8 md:p-10 shadow-2xl min-h-[340px] sm:min-h-[300px] flex flex-col justify-end">
-          {/* Background Poster */}
-          <img
-            src={featuredShow.coverImage}
-            alt={featuredShow.title}
-            className="absolute inset-0 size-full object-cover opacity-45 brightness-75"
-          />
-
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent" />
-
-          {/* Featured Content Info */}
-          <div className="relative z-10 max-w-xl">
-            <div className="flex flex-wrap items-center gap-2 mb-2.5">
-              <span className="rounded-full bg-amber-400 px-2.5 py-0.5 text-[10px] font-extrabold text-black uppercase tracking-wider shrink-0">
-                FEATURED SPOTLIGHT
-              </span>
-              <span className="text-xs text-white/90 font-medium">
-                {featuredShow.language} · {featuredShow.totalEpisodes} Episodes
-              </span>
-              <span className="flex items-center gap-1 text-xs font-bold text-amber-300">
-                <Star className="size-3 fill-amber-400 text-amber-400" />
-                {featuredShow.rating}
-              </span>
-            </div>
-
-            <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              {featuredShow.title}
-            </h1>
-
-            <p className="mt-2 line-clamp-2 text-xs sm:text-sm text-white/80 leading-relaxed max-w-lg">
-              {featuredShow.synopsis}
-            </p>
-
-            <div className="mt-4 sm:mt-5 flex flex-wrap items-center gap-3">
-              <Link
-                to="/feed"
-                className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-6 py-2.5 text-xs sm:text-sm font-bold text-black shadow-lg shadow-amber-400/30 transition hover:brightness-110 active:scale-95"
-              >
-                <Play className="size-4 fill-current" />
-                <span>Play Ep 1 (2 Min)</span>
-              </Link>
-              <Link
-                to="/search"
-                search={{ q: featuredShow.title }}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/20 active:scale-95"
-              >
-                Details & Cast
-              </Link>
-            </div>
+      {/* Loading Skeleton */}
+      {isLoading ? (
+        <div className="mx-auto flex h-[340px] max-w-7xl items-center justify-center p-6">
+          <div className="flex flex-col items-center gap-3 text-muted-foreground">
+            <Loader2 className="size-8 animate-spin text-amber-400" />
+            <p className="text-xs">Loading Bhojpuri shows...</p>
           </div>
         </div>
-      </section>
+      ) : null}
+
+      {/* Featured Spotlight Banner (If shows exist) */}
+      {!isLoading && featuredShow ? (
+        <section className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 pt-4 pb-2">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 p-6 sm:p-8 md:p-10 shadow-2xl min-h-[340px] sm:min-h-[300px] flex flex-col justify-end">
+            <img
+              src={featuredShow.coverImage}
+              alt={featuredShow.title}
+              className="absolute inset-0 size-full object-cover opacity-45 brightness-75"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent" />
+
+            <div className="relative z-10 max-w-xl">
+              <div className="flex flex-wrap items-center gap-2 mb-2.5">
+                <span className="rounded-full bg-amber-400 px-2.5 py-0.5 text-[10px] font-extrabold text-black uppercase tracking-wider shrink-0">
+                  FEATURED SPOTLIGHT
+                </span>
+                <span className="text-xs text-white/90 font-medium">
+                  {featuredShow.language} · {featuredShow.totalEpisodes} Episodes
+                </span>
+                {featuredShow.rating ? (
+                  <span className="flex items-center gap-1 text-xs font-bold text-amber-300">
+                    <Star className="size-3 fill-amber-400 text-amber-400" />
+                    {featuredShow.rating}
+                  </span>
+                ) : null}
+              </div>
+
+              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                {featuredShow.title}
+              </h1>
+
+              <p className="mt-2 line-clamp-2 text-xs sm:text-sm text-white/80 leading-relaxed max-w-lg">
+                {featuredShow.synopsis}
+              </p>
+
+              <div className="mt-4 sm:mt-5 flex flex-wrap items-center gap-3">
+                <Link
+                  to="/feed"
+                  className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-6 py-2.5 text-xs sm:text-sm font-bold text-black shadow-lg shadow-amber-400/30 transition hover:brightness-110 active:scale-95"
+                >
+                  <Play className="size-4 fill-current" />
+                  <span>Play Ep 1 (2 Min)</span>
+                </Link>
+                <Link
+                  to="/search"
+                  search={{ q: featuredShow.title }}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-xs font-semibold text-white backdrop-blur-md transition hover:bg-white/20 active:scale-95"
+                >
+                  Details & Cast
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Hero Welcome Banner (When 0 shows in DB) */}
+      {!isLoading && allShows.length === 0 ? (
+        <section className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 pt-4 pb-2">
+          <div className="relative overflow-hidden rounded-3xl border border-amber-500/20 bg-gradient-to-b from-zinc-900 to-black p-8 sm:p-12 text-center shadow-2xl">
+            <div className="mx-auto max-w-xl">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/10 border border-amber-400/30 px-3 py-1 text-xs font-bold text-amber-300">
+                <Sparkles className="size-3.5" /> India's #1 Bhojpuri OTT
+              </span>
+              <h1 className="mt-4 font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Echo Reels Micro-Drama
+              </h1>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                Watch 2-minute original Bhojpuri short serials, romantic dramas, and comedy reels.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  to="/feed"
+                  className="inline-flex items-center gap-2 rounded-full bg-amber-400 px-7 py-3 text-sm font-bold text-black shadow-lg shadow-amber-400/20 transition hover:brightness-110 active:scale-95"
+                >
+                  <Play className="size-4 fill-current" />
+                  <span>Watch Reels Feed</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {/* Main Landing OTT Sections */}
       <main className="mx-auto w-full max-w-7xl px-4 sm:px-6 pb-20">
-        {/* Sticky Category Bar */}
         <OTTCategoryBar
           activeCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />
 
         {/* SECTION 1: TRENDING NOW */}
-        {(selectedCategory === "all" || selectedCategory === "trending") && (
+        {(selectedCategory === "all" || selectedCategory === "trending") && trendingShows.length > 0 && (
           <OTTSectionRow
             title="Trending Now"
             subtitle="Top streamed 2-minute micro-dramas across India today"
@@ -342,7 +340,7 @@ function LandingPage() {
         )}
 
         {/* SECTION 2: COMING SOON */}
-        {(selectedCategory === "all" || selectedCategory === "coming_soon") && (
+        {(selectedCategory === "all" || selectedCategory === "coming_soon") && comingSoonShows.length > 0 && (
           <OTTSectionRow
             title="Coming Soon & Exclusive Drops"
             subtitle="Upcoming original series arriving this week"
@@ -354,7 +352,7 @@ function LandingPage() {
         )}
 
         {/* SECTION 3: DRAMA & ROMANCE */}
-        {(selectedCategory === "all" || selectedCategory === "drama") && (
+        {(selectedCategory === "all" || selectedCategory === "drama") && dramaShows.length > 0 && (
           <OTTSectionRow
             title="Drama & Romance"
             subtitle="Heartfelt Indian love stories, family drama, and emotional bonds"
@@ -366,7 +364,7 @@ function LandingPage() {
         )}
 
         {/* SECTION 4: 18+ BOLD & MATURE */}
-        {(selectedCategory === "all" || selectedCategory === "18_plus") && (
+        {(selectedCategory === "all" || selectedCategory === "18_plus") && adultShows.length > 0 && (
           <OTTSectionRow
             title="18+ Bold & Sensual"
             subtitle="Late-night mature romance, dark desire, and psychological intrigue"
@@ -378,8 +376,8 @@ function LandingPage() {
           />
         )}
 
-        {/* SECTION 5: SHORT SERIALS (DAILY MINI-SOAPS) */}
-        {(selectedCategory === "all" || selectedCategory === "short_serial") && (
+        {/* SECTION 5: SHORT SERIALS */}
+        {(selectedCategory === "all" || selectedCategory === "short_serial") && shortSerialShows.length > 0 && (
           <OTTSectionRow
             title="Short Serials & Daily Soaps"
             subtitle="Bite-sized daily serials packed with comedy, family twists, and cliffhangers"
@@ -391,7 +389,7 @@ function LandingPage() {
         )}
 
         {/* SECTION 6: SUSPENSE & THRILLER */}
-        {(selectedCategory === "all" || selectedCategory === "thriller") && (
+        {(selectedCategory === "all" || selectedCategory === "thriller") && thrillerShows.length > 0 && (
           <OTTSectionRow
             title="Suspense & Cyber Thrillers"
             subtitle="Fast-paced crime, murder mystery, and edge-of-the-seat cliffhangers"
@@ -402,7 +400,7 @@ function LandingPage() {
           />
         )}
 
-        {/* Quick Search Bar with Trending Search Tags (At the bottom) */}
+        {/* Quick Search Bar */}
         <div className="mx-auto w-full max-w-2xl mt-14 mb-4 pt-10 border-t border-white/10">
           <form
             onSubmit={handleSearchSubmit}
@@ -424,33 +422,10 @@ function LandingPage() {
               <span>Search</span>
             </button>
           </form>
-
-          {/* Quick Trending Keyword Pills */}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5 text-[11px] px-2">
-            <span className="text-muted-foreground shrink-0 font-medium mr-1">Quick search:</span>
-            {[
-              { label: "🌟 Pawan Singh", q: "Pawan Singh" },
-              { label: "💥 Khesari Lal", q: "Khesari Lal" },
-              { label: "🎬 Nirahua", q: "Nirahua" },
-              { label: "❤️ Bhojpuri Romance", q: "Romance" },
-              { label: "⚡ Action Dhamaka", q: "Action" },
-              { label: "🔞 18+ Suspense", q: "18+" },
-              { label: "🌾 Dehati Drama", q: "Drama" },
-            ].map(({ label, q }) => (
-              <button
-                key={label}
-                type="button"
-                onClick={() => void navigate({ to: "/search", search: { q } })}
-                className="shrink-0 rounded-full bg-white/5 border border-white/10 px-3 py-1 text-white/80 transition hover:bg-amber-400/20 hover:border-amber-400/40 hover:text-amber-300 active:scale-95 cursor-pointer"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
         </div>
       </main>
 
-      {/* Minimal Clean Footer */}
+      {/* Footer */}
       <footer className="border-t border-white/10 bg-black/80 py-8">
         <div className="mx-auto flex w-full max-w-7xl flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-6 text-xs text-muted-foreground">
           <div className="flex items-center gap-3">

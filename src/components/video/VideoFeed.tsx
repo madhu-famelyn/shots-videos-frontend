@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { EmptyState } from "@/components/common/EmptyState";
 import { ErrorState } from "@/components/common/ErrorState";
 import { Loading } from "@/components/common/Loading";
-import { CategoryBar } from "@/components/video/CategoryBar";
 import { VideoCard } from "@/components/video/VideoCard";
 import { useActiveItem } from "@/hooks/useVideoPlayer";
 import { useInfiniteFeed } from "@/hooks/useInfiniteFeed";
@@ -68,7 +67,6 @@ export function VideoFeed() {
 
   return (
     <div className="relative h-full">
-      <CategoryBar />
       <div
         ref={containerRef}
         tabIndex={0}

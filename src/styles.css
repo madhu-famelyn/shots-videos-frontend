@@ -295,3 +295,39 @@
   }
 }
 
+
+/* Video.js Modern Theme */
+.video-js {
+  font-family: inherit;
+  background-color: #000;
+}
+
+.video-js .vjs-big-play-button {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 9999px !important;
+  width: 72px !important;
+  height: 72px !important;
+  line-height: 68px !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+.video-js:hover .vjs-big-play-button {
+  background-color: rgba(230, 0, 70, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  transform: scale(1.08);
+}
+
+.video-js .vjs-play-progress {
+  background-color: var(--color-brand, #ff2442) !important;
+}
+
+.video-js .vjs-volume-level {
+  background-color: var(--color-brand, #ff2442) !important;
+}
+
+.video-js .vjs-control-bar {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent) !important;
+}
